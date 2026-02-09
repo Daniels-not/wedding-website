@@ -8,9 +8,9 @@ import "react-toastify/dist/ReactToastify.css";
 const RTDB_URL =
   "https://weddingrk-8c8cc-default-rtdb.firebaseio.com/rsvps.json";
 const EMAIL_ENDPOINT =
-  "https://formsubmit.co/ajax/ramydcampusanov@hotmail.com";
+  "https://formsubmit.co/ajax/ramydcampusanov@hotmail.com"; // keeps using your FormSubmit endpoint but we'll post confirmation to the guest's email field
 
-// Memoized InputGroup
+// Memoized InputGroup (unchanged)
 const InputGroup = memo(
   ({ id, label, value, onChange, type = "text", textarea = false, maxW = "max-w-[400px]", disabled }) => {
     const isActive = value !== undefined && String(value).length > 0;
@@ -85,9 +85,9 @@ export default function RSVPSection() {
     localStorage.setItem("rsvp-draft", JSON.stringify(form));
   }, [form]);
 
-  // 🔧 FIXED: removed unnecessary dependency
-  const steps = useMemo(() => {
-    if (form.coming === "No") {
+  // Helper to build step list from a form object (used both in useMemo and for the "fake" form)
+  const buildSteps = (f) => {
+    if (f.coming === "No") {
       return ["coming", "fullName"];
     }
 
@@ -96,24 +96,27 @@ export default function RSVPSection() {
     s.push("fullName");
     s.push("plusOneQ");
 
-    if (form.bringingPlusOne === "Yes") {
+    if (f.bringingPlusOne === "Yes") {
       s.push("plusOneName");
       s.push("dietary");
     } else {
       s.push("hasGuests");
-      if (form.hasGuests === "Yes") {
+      if (f.hasGuests === "Yes") {
         s.push("guestNames");
       }
       s.push("dietary");
     }
 
-    if (form.hasDietary === "Yes") {
+    if (f.hasDietary === "Yes") {
       s.push("dietaryText");
     }
 
     s.push("contact");
     return s;
-  }, [form.coming, form.bringingPlusOne, form.hasGuests, form.hasDietary]);
+  };
+
+  // Steps derived from current form (rebuilds when relevant fields change)
+  const steps = useMemo(() => buildSteps(form), [form.coming, form.bringingPlusOne, form.hasGuests, form.hasDietary]);
 
   const summaryIndex = steps.length;
 
@@ -166,29 +169,20 @@ export default function RSVPSection() {
     }
   };
 
-  // const goToIndex = (i) => {
-  //   // clamp
-  //   const clamped = Math.max(0, Math.min(summaryIndex, i));
-  //   setIndex(clamped);
-  // };
-
+  // NEXT / BACK (keeps original behavior)
   const next = () => {
     const currentKey = index < steps.length ? steps[index] : null;
     if (currentKey && !validateKey(currentKey)) return;
-
-    // advance to next index (summary included)
     if (index < summaryIndex) {
       setIndex((i) => Math.min(summaryIndex, i + 1));
     }
   };
 
   const back = () => {
-    // if at summary, go to last step
     if (index === summaryIndex) {
       setIndex(Math.max(0, steps.length - 1));
       return;
     }
-    // normal back
     setIndex((i) => Math.max(0, i - 1));
   };
 
@@ -199,6 +193,9 @@ export default function RSVPSection() {
     return `${nums.slice(0, 3)}-${nums.slice(3, 6)}-${nums.slice(6, 10)}`;
   };
 
+  // FIXED: submitRSVP now sends one confirmation email (to the guest email) after saving to RTDB.
+  // Note: because you're using Formsubmit endpoint to YOUR email, behavior depends on your FormSubmit config.
+  // This code posts { email: guestEmail, subject: ..., message: ... } to the endpoint to attempt to send a confirmation to the guest.
   const submitRSVP = async () => {
     // validate all steps before final submit
     for (let i = 0; i < steps.length; i++) {
@@ -228,6 +225,7 @@ export default function RSVPSection() {
     };
 
     try {
+      // 1) Save to RTDB
       const res = await fetch(RTDB_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -236,27 +234,8 @@ export default function RSVPSection() {
       const data = await res.json();
       if (data && data.name) setSavedDbKey(data.name);
 
-      await fetch(EMAIL_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject: "New Wedding RSVP 💍",
-          message: `
-Name: ${payload.fullName}
-Coming: ${payload.coming}
-Bringing +1: ${payload.bringingPlusOne}
-+1 name: ${payload.plusOneName}
-Additional guests: ${payload.hasGuests}
-Guest names: ${payload.guestNames}
-Dietary: ${payload.dietary}
-Email: ${payload.email}
-Phone: ${payload.phone}
-Total additional guests: ${payload.guests}
-          `,
-          email: payload.email,
-        }),
-      });
-
+      // 2) Send confirmation email TO THE GUEST (only). 
+      // Removed the earlier duplicate post that caused confusion.
       if (payload.email) {
         await fetch(EMAIL_ENDPOINT, {
           method: "POST",
@@ -264,11 +243,26 @@ Total additional guests: ${payload.guests}
           body: JSON.stringify({
             email: payload.email,
             subject: "We received your RSVP 💖",
-            message: "Thank you so much for your RSVP! We can’t wait to celebrate with you.",
+            message: `Hi ${payload.fullName || ""},
+
+Thank you so much for your RSVP! We can’t wait to celebrate with you.
+
+Summary:
+- Attending: ${payload.coming}
+- +1: ${payload.bringingPlusOne} ${payload.plusOneName ? `(${payload.plusOneName})` : ""}
+- Additional household guests: ${payload.hasGuests} ${payload.guestNames ? `(${payload.guestNames})` : ""}
+- Dietary: ${payload.hasDietary} ${payload.dietary ? `(${payload.dietary})` : ""}
+- Total additional guests recorded: ${payload.guests}
+
+If you need to change your RSVP, reply to this message or contact us.
+
+With love,
+R & K`,
           }),
         });
       }
 
+      // clear draft and show thank you
       localStorage.removeItem("rsvp-draft");
       setSubmitted(true);
       setIndex(summaryIndex + 1); // show thank-you page
@@ -316,7 +310,7 @@ Total additional guests: ${payload.guests}
     }
   };
 
-  // helpers for UI
+  // Styles & small helpers (unchanged)
   const btnPrimary = "px-6 py-3 rounded-xl bg-black text-white hover:opacity-90 transition text-lg";
   const btnGhost = "px-4 py-3 rounded-xl border border-gray-300 bg-white text-black hover:bg-gray-100 transition text-lg";
   const btnYesNo = (v, selected) =>
@@ -332,8 +326,6 @@ Total additional guests: ${payload.guests}
     const editHandler = () => {
       if (stepIdx >= 0) setIndex(stepIdx);
       else {
-        // if stepKey isn't present because of branching, jump to a best-fit step
-        // e.g., if plusOneName isn't present but you want to edit plusOneName, go to plusOneQ
         const fallback =
           stepKey === "plusOneName" ? steps.indexOf("plusOneQ") : steps.indexOf("contact");
         setIndex(Math.max(0, fallback));
@@ -351,6 +343,52 @@ Total additional guests: ${payload.guests}
   };
 
   const currentKey = index < steps.length ? steps[index] : index === summaryIndex ? "summary" : "thankyou";
+
+  // NEW: Unified handler for Yes/No selection buttons to avoid double-tap issues.
+  const handleYesNo = (key, v) => {
+    // Build a temporary form representing the immediate change
+    const fakeForm = { ...form };
+
+    if (key === "coming") {
+      fakeForm.coming = v;
+      if (v === "No") {
+        // reset everything else when not coming
+        fakeForm.bringingPlusOne = "";
+        fakeForm.plusOneName = "";
+        fakeForm.hasGuests = "";
+        fakeForm.guestNames = "";
+        fakeForm.hasDietary = "";
+        fakeForm.dietary = "";
+        fakeForm.email = "";
+        fakeForm.phone = "";
+      }
+    } else if (key === "plusOneQ") {
+      fakeForm.bringingPlusOne = v;
+      if (v === "Yes") {
+        // skip household guests when bringing +1
+        fakeForm.hasGuests = "";
+        fakeForm.guestNames = "";
+      } else {
+        // clear +1 name when selecting No
+        fakeForm.plusOneName = "";
+      }
+    } else if (key === "hasGuests") {
+      fakeForm.hasGuests = v;
+      if (v === "No") fakeForm.guestNames = "";
+    } else if (key === "dietary") {
+      fakeForm.hasDietary = v;
+      if (v === "No") fakeForm.dietary = "";
+    }
+
+    // apply the change to real state
+    setForm(fakeForm);
+
+    // compute next steps based on the fake form and advance index accordingly
+    const newSteps = buildSteps(fakeForm);
+    const pos = newSteps.indexOf(key);
+    const nextIdx = pos === -1 ? Math.min(summaryIndex, index + 1) : Math.min(summaryIndex, pos + 1);
+    setIndex(nextIdx);
+  };
 
   return (
     <section id="rsvp" className="py-16 relative overflow-hidden min-h-[550px] pt-50">
@@ -380,21 +418,7 @@ Total additional guests: ${payload.guests}
                   {["Yes", "No"].map((v) => (
                     <button
                       key={v}
-                      onClick={() => {
-                        update("coming", v);
-                        // reset branching answers if changing to No
-                        if (v === "No") {
-                          update("bringingPlusOne", "");
-                          update("plusOneName", "");
-                          update("hasGuests", "");
-                          update("guestNames", "");
-                          update("hasDietary", "");
-                          update("dietary", "");
-                          update("email", "");
-                          update("phone", "");
-                        }
-                        next();
-                      }}
+                      onClick={() => handleYesNo("coming", v)}
                       className={btnYesNo(v, form.coming === v)}
                     >
                       {v}
@@ -423,18 +447,7 @@ Total additional guests: ${payload.guests}
                   {["Yes", "No"].map((v) => (
                     <button
                       key={v}
-                      onClick={() => {
-                        update("bringingPlusOne", v);
-                        // when choosing Yes, we clear household fields; when choosing No we clear plusOneName
-                        if (v === "Yes") {
-                          update("hasGuests", "");
-                          update("guestNames", "");
-                        } else {
-                          update("plusOneName", "");
-                        }
-                        // move to next naturally (steps[] is rebuilt based on form)
-                        next();
-                      }}
+                      onClick={() => handleYesNo("plusOneQ", v)}
                       className={btnYesNo(v, form.bringingPlusOne === v)}
                     >
                       {v}
@@ -463,11 +476,7 @@ Total additional guests: ${payload.guests}
                   {["Yes", "No"].map((v) => (
                     <button
                       key={v}
-                      onClick={() => {
-                        update("hasGuests", v);
-                        if (v === "No") update("guestNames", "");
-                        next();
-                      }}
+                      onClick={() => handleYesNo("hasGuests", v)}
                       className={btnYesNo(v, form.hasGuests === v)}
                     >
                       {v}
@@ -508,11 +517,7 @@ Total additional guests: ${payload.guests}
                   {["Yes", "No"].map((v) => (
                     <button
                       key={v}
-                      onClick={() => {
-                        update("hasDietary", v);
-                        if (v === "No") update("dietary", "");
-                        next();
-                      }}
+                      onClick={() => handleYesNo("dietary", v)}
                       className={btnYesNo(v, form.hasDietary === v)}
                     >
                       {v}
