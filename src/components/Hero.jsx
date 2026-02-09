@@ -144,7 +144,7 @@ export default function Hero({ dark, setDark }) {
 
                 <button
                   onClick={() => setMenuOpen(true)}
-                  className={`md:hidden ${dark ? "text-white" : "text-slate-900"}`}
+                  className={`md:hidden cursor-pointer ${dark ? "text-white" : "text-slate-900"}`}
                 >
                   <Menu size={26} />
                 </button>
@@ -175,7 +175,7 @@ export default function Hero({ dark, setDark }) {
 
             <button
               onClick={() => setMenuOpen(false)}
-              className="absolute top-6 right-6"
+              className="absolute top-6 right-6 cursor-pointer"
             >
               <X size={28} />
             </button>
@@ -217,7 +217,13 @@ export default function Hero({ dark, setDark }) {
               </div>
             ))}
           </div>
-          <button className="mt-14 px-10 py-4 rounded-full bg-white text-slate-900 text-sm tracking-wide hover:bg-white/90 transition cursor-pointer"> RSVP </button>
+            <button
+              onClick={() => scrollTo("rsvp")}
+              className="mt-14 px-10 py-4 rounded-full bg-white text-slate-900 text-sm tracking-wide hover:bg-white/90 transition cursor-pointer"
+            >
+              RSVP
+            </button>
+
         </motion.div>
       </div>
     </section>

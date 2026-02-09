@@ -294,7 +294,7 @@ const mapSrc = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
                             onClick={() => openExpedia(h)}
                             className="px-3 py-2 rounded-full bg-black text-white text-sm"
                           >
-                            Open on Expedia
+                            Expedia
                           </button>
                           <a
                             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name + ", Huntsville, AL")}`}

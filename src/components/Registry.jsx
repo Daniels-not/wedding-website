@@ -1,8 +1,11 @@
+// src/components/Registry.jsx
 import { useEffect, useRef, useState } from "react";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { motion, AnimatePresence } from "framer-motion";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 import db from "../db";
 
 import "swiper/css";
@@ -12,6 +15,11 @@ export default function Registry() {
   const [activeItem, setActiveItem] = useState(null); // item pending confirmation
   const [toast, setToast] = useState(null);
   const sectionRef = useRef(null);
+
+  // Confetti state + timer ref
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiTimeoutRef = useRef(null);
+  const { width, height } = useWindowSize();
 
   // Special id: do NOT allow marking as purchased (only view)
   const DISABLED_CHECK_ID = "bWqZ4mtKLk1TMhXnIF2F";
@@ -27,6 +35,15 @@ export default function Registry() {
     };
 
     fetchRegistry();
+  }, []);
+
+  // Cleanup confetti timer on unmount
+  useEffect(() => {
+    return () => {
+      if (confettiTimeoutRef.current) {
+        clearTimeout(confettiTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Open confirmation modal for an item
@@ -55,6 +72,14 @@ export default function Registry() {
         )
       );
 
+      // 🎉 Trigger confetti for successful purchase
+      setShowConfetti(true);
+      if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
+      confettiTimeoutRef.current = setTimeout(() => {
+        setShowConfetti(false);
+        confettiTimeoutRef.current = null;
+      }, 4000);
+
       setToast(`"${activeItem.title || activeItem.name || "Item"}" marked as purchased`);
       setActiveItem(null);
       setTimeout(() => setToast(null), 3000);
@@ -75,6 +100,17 @@ export default function Registry() {
       transition={{ duration: 0.8, ease: "easeOut" }}
       className="max-w-7xl mx-auto px-6 py-24"
     >
+      {/* Confetti (full-screen) */}
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={180}
+          gravity={0.18}
+        />
+      )}
+
       <div className="text-center mb-28">
         <h2 className="text-5xl font-serif mb-4 tracking-tight">Registry</h2>
         <p className="max-w-2xl mx-auto text-gray-500 dark:text-gray-400 text-xl">

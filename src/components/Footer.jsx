@@ -22,30 +22,35 @@ export default function Footer() {
           {/* Links */}
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-4">
             <a
+              href=""
               id="home"              
               className="text-lg text-gray-500 hover:text-black transition font-medium cursor-pointer"
             >
               Home
             </a>
             <a
+              href=""
               id="story"
               className="text-lg text-gray-500 hover:text-black transition font-medium cursor-pointer"
             >
               Our Story
             </a>
             <a
+              href=""
               id="rsvp"
               className="text-lg text-gray-500 hover:text-black transition font-medium cursor-pointer"
             >
                 RSVP
             </a>
             <a
+              href=""
               id="registry"
               className="text-lg text-gray-500 hover:text-black transition font-medium cursor-pointer"
             >
                 Registry
             </a>
             <a
+              href=""
               id="information"
               className="text-lg text-gray-500 hover:text-black transition font-medium cursor-pointer"
             >

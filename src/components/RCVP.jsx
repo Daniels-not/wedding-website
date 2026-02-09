@@ -55,7 +55,7 @@ const InputGroup = memo(
 );
 
 export default function RSVPSection() {
-  const [index, setIndex] = useState(0); // zero-based index into steps[]
+  const [index, setIndex] = useState(0);
   const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -70,12 +70,11 @@ export default function RSVPSection() {
       : {
           coming: "",
           fullName: "",
-          bringingPlusOne: "", // Yes/No
+          bringingPlusOne: "",
           plusOneName: "",
-          hasGuests: "", // Yes/No (household)
+          hasGuests: "",
           guestNames: "",
-          // family removed per request
-          hasDietary: "", // Yes/No
+          hasDietary: "",
           dietary: "",
           email: "",
           phone: "",
@@ -86,50 +85,43 @@ export default function RSVPSection() {
     localStorage.setItem("rsvp-draft", JSON.stringify(form));
   }, [form]);
 
-  // Build the dynamic steps array (keys). This makes skipping reliable.
+  // 🔧 FIXED: removed unnecessary dependency
   const steps = useMemo(() => {
-    // If not coming, only ask coming + fullName (old behavior) and then summary
     if (form.coming === "No") {
       return ["coming", "fullName"];
     }
 
     const s = [];
-    s.push("coming"); // 0
-    s.push("fullName"); // 1
-    s.push("plusOneQ"); // 2 -> "Will you bring a +1?"
+    s.push("coming");
+    s.push("fullName");
+    s.push("plusOneQ");
 
     if (form.bringingPlusOne === "Yes") {
-      s.push("plusOneName"); // 3
-      // if bringing +1, we skip household and family entirely (per request)
-      s.push("dietary"); // next: dietary question
+      s.push("plusOneName");
+      s.push("dietary");
     } else {
-      // not bringing +1 -> ask household guests
-      s.push("hasGuests"); // 3
+      s.push("hasGuests");
       if (form.hasGuests === "Yes") {
-        s.push("guestNames"); // 4
+        s.push("guestNames");
       }
-      s.push("dietary"); // next dietary question
+      s.push("dietary");
     }
 
     if (form.hasDietary === "Yes") {
-      s.push("dietaryText"); // optional dietary details
+      s.push("dietaryText");
     }
 
-    s.push("contact"); // email & phone at the end
-
+    s.push("contact");
     return s;
-  }, [form.coming, form.bringingPlusOne, form.hasGuests, form.hasDietary, form.guestNames]);
+  }, [form.coming, form.bringingPlusOne, form.hasGuests, form.hasDietary]);
 
-  // summary step comes after steps[] (index === steps.length)
   const summaryIndex = steps.length;
 
-  // derived guest count (plus-one + listed guest names + the attendee themself is not included—this is extras)
   const derivedGuestCount = useMemo(() => {
     const namesCount =
-      form.guestNames && form.guestNames.trim().length > 0
-        ? form.guestNames.split(",").map((n) => n.trim()).filter(Boolean).length
-        : 0;
-    const plusOneCount = form.bringingPlusOne === "Yes" && (form.plusOneName ?? "").trim() ? 1 : 0;
+      form.guestNames?.split(",").map((n) => n.trim()).filter(Boolean).length || 0;
+    const plusOneCount =
+      form.bringingPlusOne === "Yes" && form.plusOneName?.trim() ? 1 : 0;
     return plusOneCount + namesCount;
   }, [form.guestNames, form.bringingPlusOne, form.plusOneName]);
 
@@ -174,11 +166,11 @@ export default function RSVPSection() {
     }
   };
 
-  const goToIndex = (i) => {
-    // clamp
-    const clamped = Math.max(0, Math.min(summaryIndex, i));
-    setIndex(clamped);
-  };
+  // const goToIndex = (i) => {
+  //   // clamp
+  //   const clamped = Math.max(0, Math.min(summaryIndex, i));
+  //   setIndex(clamped);
+  // };
 
   const next = () => {
     const currentKey = index < steps.length ? steps[index] : null;
