@@ -115,8 +115,7 @@ export default function RSVPSection() {
     return s;
   };
 
-  // Steps derived from current form (rebuilds when relevant fields change)
-  const steps = useMemo(() => buildSteps(form), [form.coming, form.bringingPlusOne, form.hasGuests, form.hasDietary]);
+  const steps = useMemo(() => buildSteps(form), [form]);
 
   const summaryIndex = steps.length;
 
