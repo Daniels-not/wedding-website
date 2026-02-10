@@ -8,9 +8,9 @@ import "react-toastify/dist/ReactToastify.css";
 const RTDB_URL =
   "https://weddingrk-8c8cc-default-rtdb.firebaseio.com/rsvps.json";
 const EMAIL_ENDPOINT =
-  "https://formsubmit.co/ajax/ramydcampusanov@hotmail.com"; // keeps using your FormSubmit endpoint but we'll post confirmation to the guest's email field
+  "https://formsubmit.co/ajax/ramydcampusanov@hotmail.com";
 
-// Memoized InputGroup (unchanged)
+// Memoized InputGroup
 const InputGroup = memo(
   ({ id, label, value, onChange, type = "text", textarea = false, maxW = "max-w-[400px]", disabled }) => {
     const isActive = value !== undefined && String(value).length > 0;
@@ -85,7 +85,7 @@ export default function RSVPSection() {
     localStorage.setItem("rsvp-draft", JSON.stringify(form));
   }, [form]);
 
-  // Helper to build step list from a form object (used both in useMemo and for the "fake" form)
+  // Helper to build step list from a form object
   const buildSteps = (f) => {
     if (f.coming === "No") {
       return ["coming", "fullName"];
@@ -115,6 +115,7 @@ export default function RSVPSection() {
     return s;
   };
 
+  // FIXED: Added form to dependency array
   const steps = useMemo(() => buildSteps(form), [form]);
 
   const summaryIndex = steps.length;
@@ -129,46 +130,45 @@ export default function RSVPSection() {
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
-  // validate current step key
-  const validateKey = (key) => {
+  // validate current step key - FIXED: now checks the updated form state
+  const validateKey = (key, formToValidate = form) => {
     switch (key) {
       case "coming":
-        if (!form.coming) return (toast.error("Please choose if you are coming."), false);
+        if (!formToValidate.coming) return (toast.error("Please choose if you are coming."), false);
         return true;
       case "fullName":
-        if (!form.fullName || !form.fullName.trim()) return (toast.error("Please enter your full name."), false);
+        if (!formToValidate.fullName || !formToValidate.fullName.trim()) return (toast.error("Please enter your full name."), false);
         return true;
       case "plusOneQ":
-        if (!form.bringingPlusOne) return (toast.error("Please answer whether you're bringing a +1."), false);
+        if (!formToValidate.bringingPlusOne) return (toast.error("Please answer whether you're bringing a +1."), false);
         return true;
       case "plusOneName":
-        if (form.bringingPlusOne === "Yes" && !(form.plusOneName ?? "").trim())
+        if (formToValidate.bringingPlusOne === "Yes" && !(formToValidate.plusOneName ?? "").trim())
           return (toast.error("Please enter your +1's name."), false);
         return true;
       case "hasGuests":
-        if (!form.hasGuests) return (toast.error("Please indicate if you have additional guests."), false);
+        if (!formToValidate.hasGuests) return (toast.error("Please indicate if you have additional guests."), false);
         return true;
       case "guestNames":
-        if (form.hasGuests === "Yes" && (!form.guestNames || !form.guestNames.trim()))
+        if (formToValidate.hasGuests === "Yes" && (!formToValidate.guestNames || !formToValidate.guestNames.trim()))
           return (toast.error("Please enter guest names (comma separated)."), false);
         return true;
       case "dietary":
-        if (!form.hasDietary && form.coming === "Yes") return (toast.error("Please indicate if you have dietary restrictions."), false);
+        if (!formToValidate.hasDietary && formToValidate.coming === "Yes") return (toast.error("Please indicate if you have dietary restrictions."), false);
         return true;
       case "dietaryText":
-        if (form.hasDietary === "Yes" && (!form.dietary || !form.dietary.trim()))
+        if (formToValidate.hasDietary === "Yes" && (!formToValidate.dietary || !formToValidate.dietary.trim()))
           return (toast.error("Please specify your dietary restrictions."), false);
         return true;
       case "contact":
-        // if coming yes, require email; if coming no we don't require contact in this flow
-        if (form.coming === "Yes" && (!form.email || !form.email.trim())) return (toast.error("Please enter your email."), false);
+        if (formToValidate.coming === "Yes" && (!formToValidate.email || !formToValidate.email.trim())) return (toast.error("Please enter your email."), false);
         return true;
       default:
         return true;
     }
   };
 
-  // NEXT / BACK (keeps original behavior)
+  // NEXT / BACK
   const next = () => {
     const currentKey = index < steps.length ? steps[index] : null;
     if (currentKey && !validateKey(currentKey)) return;
@@ -192,9 +192,6 @@ export default function RSVPSection() {
     return `${nums.slice(0, 3)}-${nums.slice(3, 6)}-${nums.slice(6, 10)}`;
   };
 
-  // FIXED: submitRSVP now sends one confirmation email (to the guest email) after saving to RTDB.
-  // Note: because you're using Formsubmit endpoint to YOUR email, behavior depends on your FormSubmit config.
-  // This code posts { email: guestEmail, subject: ..., message: ... } to the endpoint to attempt to send a confirmation to the guest.
   const submitRSVP = async () => {
     // validate all steps before final submit
     for (let i = 0; i < steps.length; i++) {
@@ -233,8 +230,7 @@ export default function RSVPSection() {
       const data = await res.json();
       if (data && data.name) setSavedDbKey(data.name);
 
-      // 2) Send confirmation email TO THE GUEST (only). 
-      // Removed the earlier duplicate post that caused confusion.
+      // 2) Send confirmation email TO THE GUEST
       if (payload.email) {
         await fetch(EMAIL_ENDPOINT, {
           method: "POST",
@@ -244,7 +240,7 @@ export default function RSVPSection() {
             subject: "We received your RSVP 💖",
             message: `Hi ${payload.fullName || ""},
 
-Thank you so much for your RSVP! We can’t wait to celebrate with you.
+Thank you so much for your RSVP! We can't wait to celebrate with you.
 
 Summary:
 - Attending: ${payload.coming}
@@ -264,7 +260,7 @@ R & K`,
       // clear draft and show thank you
       localStorage.removeItem("rsvp-draft");
       setSubmitted(true);
-      setIndex(summaryIndex + 1); // show thank-you page
+      setIndex(summaryIndex + 1);
       if (form.coming === "Yes") {
         setShowConfetti(true);
         timerRef.current = setTimeout(() => setShowConfetti(false), 5000);
@@ -309,7 +305,7 @@ R & K`,
     }
   };
 
-  // Styles & small helpers (unchanged)
+  // Styles & small helpers
   const btnPrimary = "px-6 py-3 rounded-xl bg-black text-white hover:opacity-90 transition text-lg";
   const btnGhost = "px-4 py-3 rounded-xl border border-gray-300 bg-white text-black hover:bg-gray-100 transition text-lg";
   const btnYesNo = (v, selected) =>
@@ -343,47 +339,47 @@ R & K`,
 
   const currentKey = index < steps.length ? steps[index] : index === summaryIndex ? "summary" : "thankyou";
 
-  // NEW: Unified handler for Yes/No selection buttons to avoid double-tap issues.
+  // FIXED: Unified handler for Yes/No selection - now updates state first, then validates with the NEW state
   const handleYesNo = (key, v) => {
-    // Build a temporary form representing the immediate change
-    const fakeForm = { ...form };
+    // Build the updated form
+    const updatedForm = { ...form };
 
     if (key === "coming") {
-      fakeForm.coming = v;
+      updatedForm.coming = v;
       if (v === "No") {
-        // reset everything else when not coming
-        fakeForm.bringingPlusOne = "";
-        fakeForm.plusOneName = "";
-        fakeForm.hasGuests = "";
-        fakeForm.guestNames = "";
-        fakeForm.hasDietary = "";
-        fakeForm.dietary = "";
-        fakeForm.email = "";
-        fakeForm.phone = "";
+        updatedForm.bringingPlusOne = "";
+        updatedForm.plusOneName = "";
+        updatedForm.hasGuests = "";
+        updatedForm.guestNames = "";
+        updatedForm.hasDietary = "";
+        updatedForm.dietary = "";
+        updatedForm.email = "";
+        updatedForm.phone = "";
       }
     } else if (key === "plusOneQ") {
-      fakeForm.bringingPlusOne = v;
+      updatedForm.bringingPlusOne = v;
       if (v === "Yes") {
-        // skip household guests when bringing +1
-        fakeForm.hasGuests = "";
-        fakeForm.guestNames = "";
+        updatedForm.hasGuests = "";
+        updatedForm.guestNames = "";
       } else {
-        // clear +1 name when selecting No
-        fakeForm.plusOneName = "";
+        updatedForm.plusOneName = "";
       }
     } else if (key === "hasGuests") {
-      fakeForm.hasGuests = v;
-      if (v === "No") fakeForm.guestNames = "";
+      updatedForm.hasGuests = v;
+      if (v === "No") updatedForm.guestNames = "";
     } else if (key === "dietary") {
-      fakeForm.hasDietary = v;
-      if (v === "No") fakeForm.dietary = "";
+      updatedForm.hasDietary = v;
+      if (v === "No") updatedForm.dietary = "";
     }
 
-    // apply the change to real state
-    setForm(fakeForm);
+    // Update the form state first
+    setForm(updatedForm);
 
-    // compute next steps based on the fake form and advance index accordingly
-    const newSteps = buildSteps(fakeForm);
+    // Validate with the UPDATED form to prevent false errors
+    if (!validateKey(key, updatedForm)) return;
+
+    // Compute next steps based on the updated form and advance
+    const newSteps = buildSteps(updatedForm);
     const pos = newSteps.indexOf(key);
     const nextIdx = pos === -1 ? Math.min(summaryIndex, index + 1) : Math.min(summaryIndex, pos + 1);
     setIndex(nextIdx);
@@ -397,7 +393,7 @@ R & K`,
         <h1 className="text-4xl font-serif text-center mb-6">RSVP for Our Wedding</h1>
         <p className="text-center text-lg mb-4 opacity-70">Step {displayStep} of {displayTotal}</p>
         <p className="text-center text-lg mb-12 opacity-70">
-          We can’t wait to celebrate with you! Please answer the questions below.
+          We can't wait to celebrate with you! Please answer the questions below.
         </p>
 
         <AnimatePresence mode="wait">
@@ -467,7 +463,7 @@ R & K`,
               />
             )}
 
-            {/* hasGuests (only when not bringing +1 and coming === Yes) */}
+            {/* hasGuests */}
             {currentKey === "hasGuests" && form.coming === "Yes" && form.bringingPlusOne !== "Yes" && (
               <div className="flex flex-col items-center gap-6">
                 <h2 className="text-2xl font-semibold mb-6 text-center">Are you bringing any additional guests from your household?</h2>
