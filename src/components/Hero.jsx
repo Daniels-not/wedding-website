@@ -134,13 +134,13 @@ export default function Hero({ dark, setDark }) {
               </ul>
 
               <div className="flex items-center gap-4">
-                <motion.button
+                {/* <motion.button
                   whileTap={{ rotate: 180 }}
                   onClick={() => setDark(!dark)}
                   className={dark ? "text-white" : "text-slate-900"}
                 >
                   {dark ? <Sun size={20} /> : <Moon size={20} />}
-                </motion.button>
+                </motion.button> */}
 
                 <button
                   onClick={() => setMenuOpen(true)}

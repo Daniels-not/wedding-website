@@ -266,6 +266,14 @@ R & K`,
         timerRef.current = setTimeout(() => setShowConfetti(false), 5000);
       }
       toast.success("RSVP submitted! 🎉");
+      
+      // Scroll to registry section after a short delay
+      setTimeout(() => {
+        const registrySection = document.getElementById("registry");
+        if (registrySection) {
+          registrySection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 2000); // 2 second delay to let user see the success message
     } catch (err) {
       console.error(err);
       toast.error("There was an error sending your RSVP. Please try again.");
