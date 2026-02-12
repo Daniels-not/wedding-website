@@ -40,65 +40,49 @@ const mapSrc = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
       minutes: 10,
       // unsplash query gives a reasonable photo; fallback if blocked by CSP
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdaJrbxS5sw0tIQN8pPdVwsiLXtBRxsZx8Bg&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Hilton Garden Inn Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Hilton-Garden-Inn-Huntsville-SouthRedstone-Arsenal.h1927061.Hotel-Information",
     },
     {
       name: "Homewood Suites by Hilton Huntsville",
       minutes: 11,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToDAUN_6FRs8Uf7XGZ-sSwZH2-W0Fyh3n18w&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Homewood Suites by Hilton Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Homewood-Suites-By-Hilton-Huntsville-Downtown.h7341362.Hotel-Information"
     },
     {
       name: "SpringHill Suites by Marriott",
       minutes: 9,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRy71DYPJbAa0GTut_1vLi7ml4kX3DbjCdnvg&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "SpringHill Suites Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-SpringHill-Suites-Huntsville-Downtown.h4129516.Hotel-Information"
     },
     {
       name: "Embassy Suites by Hilton",
       minutes: 12,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDAH91eJFBMyRgxwKQm0M_yZZzNYhrAcGuSg&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Embassy Suites Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Embassy-Suites-By-Hilton-Huntsville-Hotel-Spa.h1376206.Hotel-Information"
     },
     {
       name: "Candlewood Suites",
       minutes: 8,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU3TImWP5UDJah6NxMzyAXmJDDu2uC5Cp2nA&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Candlewood Suites Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Candlewood-Suites-Huntsville-Research-Park-By-IHG.h114736037.Hotel-Information?chkin=2026-03-01&chkout=2026-03-02&x_pwa=1&rfrr=HSR&pwa_ts=1770881246991&referrerUrl=aHR0cHM6Ly93d3cuZXhwZWRpYS5jb20vSG90ZWwtU2VhcmNo&useRewards=false&rm1=a2&regionId=6097620&destination=University+of+Alabama-Huntsville%2C+Huntsville%2C+Alabama%2C+United+States+of+America&destType=MARKET&selected=114736037&latLong=34.72716%2C-86.639286&sort=RECOMMENDED&top_dp=129&top_cur=USD&userIntent=&selectedRoomType=326433559&selectedRatePlan=403119106&searchId=6f913cbf-8584-4c86-b65b-4285d0334b02"
     },
     {
       name: "Huntsville Marriott at the Space & Rocket Center",
       minutes: 18,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV2E5wTrWoRZkpEnQ3n2NhB4umQrDnLA7fXA&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Huntsville Marriott at the Space & Rocket Center, Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Huntsville-Marriott-At-The-Space-Rocket-Center.h16086.Hotel-Information"
     },
     {
       name: "Holiday Inn Express & Suites Huntsville",
       minutes: 14,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqYMWOQtK3D8WIJmpemdBV7gOZmhnpuDfXPA&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Holiday Inn Express & Suites Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Holiday-Inn-Express-Suites-Huntsville.h1700889.Hotel-Information"
     },
     {
       name: "Drury Inn & Suites Huntsville at the Space & Rocket Center",
       minutes: 16,
       image: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDkxtZMeVjb9aosu6K3uuOyM_v5GnGA8IYsA&s`,
-      expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(
-        "Drury Inn & Suites Huntsville, AL"
-      )}`,
+      expedia: "https://www.expedia.com/Huntsville-Hotels-Drury-Inn-Suites-Huntsville-At-The-Space-Rocket-Center.h22357017.Hotel-Information"
     },
   ];
 

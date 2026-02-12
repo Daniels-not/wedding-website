@@ -240,19 +240,19 @@ export default function RSVPSection() {
             subject: "We received your RSVP 💖",
             message: `Hi ${payload.fullName || ""},
 
-Thank you so much for your RSVP! We can't wait to celebrate with you.
+              Thank you so much for your RSVP! We can't wait to celebrate with you.
 
-Summary:
-- Attending: ${payload.coming}
-- +1: ${payload.bringingPlusOne} ${payload.plusOneName ? `(${payload.plusOneName})` : ""}
-- Additional household guests: ${payload.hasGuests} ${payload.guestNames ? `(${payload.guestNames})` : ""}
-- Dietary: ${payload.hasDietary} ${payload.dietary ? `(${payload.dietary})` : ""}
-- Total additional guests recorded: ${payload.guests}
+              Summary:
+              - Attending: ${payload.coming}
+              - +1: ${payload.bringingPlusOne} ${payload.plusOneName ? `(${payload.plusOneName})` : ""}
+              - Additional household guests: ${payload.hasGuests} ${payload.guestNames ? `(${payload.guestNames})` : ""}
+              - Dietary: ${payload.hasDietary} ${payload.dietary ? `(${payload.dietary})` : ""}
+              - Total additional guests recorded: ${payload.guests}
 
-If you need to change your RSVP, reply to this message or contact us.
+              If you need to change your RSVP, reply to this message or contact us.
 
-With love,
-R & K`,
+              With love,
+              R & K`,
           }),
         });
       }
