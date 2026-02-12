@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 const RTDB_URL =
   "https://weddingrk-8c8cc-default-rtdb.firebaseio.com/rsvps.json";
 const EMAIL_ENDPOINT =
-  "https://formsubmit.co/ajax/ramydcampusanov@hotmail.com";
+  "https://formsubmit.co/ajax/campusanos2607@gmail.com";
 
 // Memoized InputGroup
 const InputGroup = memo(
